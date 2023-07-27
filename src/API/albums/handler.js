@@ -7,6 +7,11 @@ class AlbumsHandler {
   constructor(service, validator) {
     this._service = service;
     this._validator = validator;
+
+    this.postAlbumHandler = this.postAlbumHandler.bind(this);
+    this.getAlbumByIdHandler = this.getAlbumByIdHandler.bind(this);
+    this.putAlbumByIdHandler = this.putAlbumByIdHandler.bind(this);
+    this.deleteAlbumByIdHandler = this.deleteAlbumByIdHandler.bind(this);
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -39,7 +44,7 @@ class AlbumsHandler {
         status: 'error',
         message: 'Maaf, terjadi kesalahan pada server',
       });
-      response.code(500);
+      response.code(400);
       console.error(error);
       return response;
     }
