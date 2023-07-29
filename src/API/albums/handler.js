@@ -15,12 +15,12 @@ class AlbumsHandler {
   }
 
   // eslint-disable-next-line require-jsdoc
-  postAlbumHandler(request, h) {
+  async postAlbumHandler(request, h) {
     try {
       this._validator.validateAlbumPayload(request.payload);
 
       const {name, year} = request.payload;
-      const albumId = this._albumsService.addAlbum({name, year});
+      const albumId = this._service.addAlbum({name, year});
 
       const response = h.response({
         status: 'success',
@@ -55,7 +55,7 @@ class AlbumsHandler {
       this._validator.validateAlbumPayload(request.payload);
 
       const {id} = request.params;
-      const album = this._albumsService.getAlbumById(id);
+      const album = this._service.getAlbumById(id);
 
       return {
         status: 'success',
@@ -77,7 +77,7 @@ class AlbumsHandler {
         status: 'error',
         message: 'Maaf, terjadi kesalahan pada server',
       });
-      response.code(500);
+      response.code(404);
       console.error(error);
       return response;
     }
@@ -85,10 +85,12 @@ class AlbumsHandler {
   // eslint-disable-next-line require-jsdoc
   putAlbumByIdHandler(request, h) {
     try {
+      this._validator.validateAlbumPayload(request.payload);
+
       const {id} = request.params;
       const {name, year} = request.payload;
 
-      this._albumsService.editAlbumById(id, {name, year});
+      this._service.editAlbumById(id, {name, year});
       return {
         status: 'success',
         message: 'Album berhasil diperbarui',
@@ -107,7 +109,7 @@ class AlbumsHandler {
         status: 'error',
         message: 'Maaf, terjadi kesalahan pada server',
       });
-      response.code(500);
+      response.code(400);
       return response;
     }
   }
@@ -115,7 +117,7 @@ class AlbumsHandler {
   deleteAlbumByIdHandler(request, h) {
     try {
       const {id} = request.params;
-      this._albumsService.deleteAlbumById(id);
+      this._service.deleteAlbumById(id);
 
       return {
         status: 'success',

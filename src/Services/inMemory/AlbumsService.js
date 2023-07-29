@@ -14,11 +14,11 @@ class AlbumsService {
   // eslint-disable-next-line require-jsdoc
   addAlbum({name, year}) {
     const id = nanoid(16);
-    const insertedAt = new Date().toISOString();
-    const updatedAt = insertedAt;
+    // const insertedAt = new Date().toISOString();
+    // const updatedAt = insertedAt;
 
     const newAlbum = {
-      id, name, year, createdAt, updatedAt,
+      id, name, year,
     };
 
     this._albums.push(newAlbum);
