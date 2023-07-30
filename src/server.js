@@ -1,20 +1,21 @@
 /* eslint-disable linebreak-style */
 // require('dotenv').config();
 const Hapi = require('@hapi/hapi');
+require('dotenv').config();
 
 const songs = require('./API/songs/index');
-const SongsService = require('./Services/inMemory/SongsService');
+const SongsService = require('./Services/postgres/SongsService');
 const SongsValidator = require('./validator/songs');
 
 const albums = require('./API/albums/index');
-const AlbumsService = require('./Services/inMemory/AlbumsService');
+const AlbumsService = require('./Services/postgres/AlbumsService');
 const AlbumsValidator = require('./validator/albums');
 
 
 const init = async () => {
   const server = Hapi.server({
-    port: 5000,
-    host: process.env.NODE_ENV !== 'production' ? 'localhost' : '0.0.0.0',
+    port: process.env.PORT,
+    host: process.env.HOST,
     routes: {
       cors: {
         origin: ['*'],
