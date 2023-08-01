@@ -57,7 +57,7 @@ class SongsHandler {
         status: 'error',
         message: 'Maaf, terjadi kesalahan pada server',
       });
-      response.code(500);
+      response.code(400);
       console.error(error);
       return response;
     }
@@ -84,10 +84,10 @@ class SongsHandler {
     }
   }
 
-  async getSongByIdHandler(request) {
+  async getSongByIdHandler(request, h) {
     try {
-      const {id} = request.params;
-      const song = await this._service.getSongById(id);
+      const {songId} = request.params;
+      const song = await this._service.getSongById(songId);
       return {
         status: 'success',
         data: {
@@ -117,7 +117,7 @@ class SongsHandler {
   async putSongByIdHandler(request, h) {
     try {
       this._validator.validateSongPayload(request.payload);
-      const {id} = request.params;
+      const {songId} = request.params;
 
       const {
         title,
@@ -128,7 +128,7 @@ class SongsHandler {
       } = request.payload;
 
       await this._service.editSongById(
-          id, {title, year, genre, performer, duration, albumId},
+          songId, {title, year, genre, performer, duration, albumId},
       );
 
       return {
@@ -154,10 +154,10 @@ class SongsHandler {
     }
   }
 
-  async deleteSongByIdHandler() {
+  async deleteSongByIdHandler(request, h) {
     try {
-      const {id} = request.params;
-      await this._service.deleteSongById(id);
+      const {songId} = request.params;
+      await this._service.deleteSongById(songId);
 
       return {
         status: 'success',

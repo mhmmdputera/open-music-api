@@ -31,8 +31,17 @@ class SongsService {
   }
 
   // eslint-disable-next-line require-jsdoc
-  async getsongs() {
-    return this._songs;
+  async getSongs(title, performer) {
+    const text = 'SELECT id, title, performer FROM songs';
+    const values = [];
+
+    const query = {
+      text: text,
+      values: values,
+    };
+
+    const result = await this._pool.query(query);
+    return result.rows;
   }
 
   // eslint-disable-next-line require-jsdoc
