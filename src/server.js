@@ -11,8 +11,8 @@ const albums = require('./API/albums/index');
 const AlbumsService = require('./Services/postgres/AlbumsService');
 const AlbumsValidator = require('./validator/albums');
 
-const users = require('./api/users');
-const UsersService = require('./services/postgres/UsersService');
+const users = require('./API/users');
+const UsersService = require('./Services/postgres/UsersService');
 const UsersValidator = require('./validator/users');
 
 const init = async () => {

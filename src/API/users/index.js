@@ -2,7 +2,7 @@
 const UsersHandler = require('./handler');
 const routes = require('./routes');
 
-const usersPlugin = {
+module.exports = {
   name: 'users',
   version: '1.0.0',
   register: async (server, {service, validator}) => {
@@ -11,4 +11,4 @@ const usersPlugin = {
   },
 };
 
-module.exports = usersPlugin;
+
