@@ -9,6 +9,11 @@ class AuthenticationsHandler {
     this._usersService = usersService;
     this._tokenManager = tokenManager;
     this._validator = validator;
+
+    this.postAuthenticationHandler = this.postAuthenticationHandler.bind(this);
+    this.putAuthenticationHandler = this.putAuthenticationHandler.bind(this);
+    // eslint-disable-next-line max-len
+    this.deleteAuthenticationHandler = this.deleteAuthenticationHandler.bind(this);
   }
 
   // eslint-disable-next-line require-jsdoc

@@ -3,12 +3,14 @@ const {Pool} = require('pg');
 const InvariantError = require('../../exceptions/InvariantError');
 const {nanoid} = require('nanoid');
 const NotFoundError = require('../../exceptions/NotFoundError');
+const AuthorizationError = require('../../exceptions/AuthorizationError');
 
 // eslint-disable-next-line require-jsdoc
 class PlaylistsService {
   // eslint-disable-next-line require-jsdoc
-  constructor() {
+  constructor(collaborationsService) {
     this._pool = new Pool();
+    this._collaborationsService = collaborationsService;
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -72,6 +74,44 @@ class PlaylistsService {
 
     if (!result.rows.length) {
       throw new InvariantError('Playlist gagal dihapus. Id tidak ditemukan.');
+    }
+  }
+
+  // eslint-disable-next-line require-jsdoc
+  async verifyPlaylistOwner(playlistId, userId) {
+    const query = {
+      text: 'SELECT * FROM playlists WHERE id = $1',
+      values: [playlistId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new NotFoundError('Playlist tidak ditemukan');
+    }
+
+    const playlist = result.rows[0];
+
+    if (playlist.owner !== userId) {
+      throw new AuthorizationError('Anda tidak memiliki akses resource ini');
+    }
+  }
+
+  // eslint-disable-next-line require-jsdoc
+  async verifyPlaylistAccess(playlistId, userId) {
+    try {
+      await this.verifyPlaylistOwner(playlistId, userId);
+    } catch (error) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+
+      try {
+        // eslint-disable-next-line max-len
+        await this._collaborationsService.verifyCollaborator(playlistId, userId);
+      } catch (error) {
+        throw error;
+      }
     }
   }
 }

@@ -21,6 +21,11 @@ const AuthenticationsService = require('./Services/postgres/AuthenticationsServi
 const TokenManager = require('./tokenize/TokenManager');
 const AuthenticationsValidator = require('./validator/authentications');
 
+const collaborations = require('./API/collaborations');
+// eslint-disable-next-line max-len
+const CollaborationsService = require('./Services/postgres/CollaborationsService');
+const CollaborationsValidator = require('./validator/collaborations');
+
 const playlists = require('./API/playlists/index.js');
 const PlaylistsValidator = require('./validator/playlists/index.js');
 const PlaylistsService = require('./Services/postgres/PlaylistsService.js');
@@ -36,11 +41,12 @@ const init = async () => {
     },
   });
 
+  const collaborationsService = new CollaborationsService();
   const songsService = new SongsService();
   const albumsService = new AlbumsService();
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
-  const playlistsService = new PlaylistsService();
+  const playlistsService = new PlaylistsService(collaborationsService);
 
   await server.register([
     {
@@ -102,6 +108,15 @@ const init = async () => {
         playlistsService,
         songsService,
         validator: PlaylistsValidator,
+      },
+    },
+    {
+      plugin: collaborations,
+      options: {
+        collaborationsService,
+        playlistsService,
+        usersService,
+        validator: CollaborationsValidator,
       },
     },
   ]);
