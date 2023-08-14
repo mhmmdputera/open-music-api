@@ -15,12 +15,11 @@ class PlaylistsService {
 
   // eslint-disable-next-line require-jsdoc
   async addPlaylist({name, owner}) {
+    const id = `user-${nanoid(16)}`;
     const query = {
       text: 'INSERT INTO playlists VALUES($1, $2, $3) RETURNING id',
       values: [id, name, owner],
     };
-
-    const id = `user-${nanoid(16)}`;
 
     const result = await this._pool.query(query);
 
@@ -28,7 +27,6 @@ class PlaylistsService {
       throw new InvariantError('Playlist gagal ditambahkan');
     }
 
-    await this._cacheService.delete(`playlist:${owner}`);
     return result.rows[0].id;
   }
 
@@ -74,6 +72,21 @@ class PlaylistsService {
 
     if (!result.rows.length) {
       throw new InvariantError('Playlist gagal dihapus. Id tidak ditemukan.');
+    }
+  }
+
+  // eslint-disable-next-line require-jsdoc
+  async addSongToPlaylist(playlistId, songId) {
+    const id = `playlist_item-${nanoid(16)}`;
+    const query = {
+      text: 'INSERT INTO playlist_songs VALUES ($1, $2, $3) RETURNING id',
+      values: [id, playlistId, songId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new InvariantError('Musik gagal ditambahkan kedalam playlist');
     }
   }
 

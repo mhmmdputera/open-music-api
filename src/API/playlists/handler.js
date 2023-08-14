@@ -8,6 +8,19 @@ class PlaylistsHandler {
     this._playlistsService = playlistsService;
     this._songsService = songsService;
     this._validator = validator;
+
+    this.postPlaylistHandler = this.postPlaylistHandler.bind(this);
+    this.getPlaylistsHandler = this.getPlaylistsHandler.bind(this);
+    this.deletePlaylistByIdHandler = this.deletePlaylistByIdHandler.bind(this);
+
+    // eslint-disable-next-line max-len
+    this.postPlaylistSongByIdHandler = this.postPlaylistSongByIdHandler.bind(this);
+
+    // eslint-disable-next-line max-len
+    this.getPlaylistSongsByIdHandler = this.getPlaylistSongsByIdHandler.bind(this);
+
+    // eslint-disable-next-line max-len
+    this.deletePlaylistSongsByIdHandler = this.deletePlaylistSongsByIdHandler.bind(this);
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -19,8 +32,7 @@ class PlaylistsHandler {
       const {id: credentialId} = request.auth.credentials;
 
       // eslint-disable-next-line max-len
-      const playlistId = await this._playlistsService.addPlaylist(name, credentialId);
-
+      const playlistId = await this._playlistsService.addPlaylist({name, owner: credentialId});
       const response = h.response({
         status: 'success',
         data: {
@@ -132,9 +144,6 @@ class PlaylistsHandler {
           playlistId, credentialId,
       );
       await this._playlistsService.addSongToPlaylist(playlistId, songId);
-      await this._playlistsService.addActivity(
-          playlistId, songId, credentialId, 'add',
-      );
 
       const response = h.response({
         status: 'success',
@@ -209,9 +218,6 @@ class PlaylistsHandler {
 
       await this._playlistsService.verifyPlaylistAccess(id, credentialId);
       await this._playlistsService.deleteSongFromPlaylist(id, songId);
-      await this._playlistsService.addActivity(
-          id, songId, credentialId, 'delete',
-      );
 
       response.code(200);
       return {
