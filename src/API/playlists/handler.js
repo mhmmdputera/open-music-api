@@ -105,7 +105,6 @@ class PlaylistsHandler {
       await this._playlistsService.verifyPlaylistOwner(id, credentialId);
       await this._playlistsService.deletePlaylist(id);
 
-      response.code(200);
       return {
         status: 'success',
         message: 'Playlist berhasil dihapus',
@@ -180,7 +179,6 @@ class PlaylistsHandler {
       // eslint-disable-next-line max-len
       const playlist = await this._playlistsService.getPlaylistSongsById(id, credentialId);
 
-      response.code(200);
       return {
         status: 'success',
         data: {
@@ -219,7 +217,6 @@ class PlaylistsHandler {
       await this._playlistsService.verifyPlaylistAccess(id, credentialId);
       await this._playlistsService.deleteSongFromPlaylist(id, songId);
 
-      response.code(200);
       return {
         status: 'success',
         message: 'Musik berhasil dihapus dari playlist',

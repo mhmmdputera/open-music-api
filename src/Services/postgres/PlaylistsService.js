@@ -91,6 +91,56 @@ class PlaylistsService {
   }
 
   // eslint-disable-next-line require-jsdoc
+  async getPlaylistSongsById(playlistId, userId) {
+    await this.verifyPlaylistAccess(playlistId, userId);
+
+    const queryGetPlaylist = {
+      // eslint-disable-next-line max-len
+      text: `SELECT p.id, p.name, u.username FROM playlists p INNER JOIN users u ON p.owner = u.id WHERE p.id = $1`,
+      values: [playlistId],
+    };
+
+    const playlistResult = await this._pool.query(queryGetPlaylist);
+
+    if (!playlistResult.rows.length) {
+      throw new NotFoundError('Playlist tidak ditemukan');
+    }
+
+    const queryGetSongs = {
+      // eslint-disable-next-line max-len
+      text: `SELECT s.id, s.title, s.performer FROM songs s INNER JOIN playlist_songs p ON p.song_id = s.id WHERE p.playlist_id = $1`,
+      values: [playlistId],
+    };
+    const songsResult = await this._pool.query(queryGetSongs);
+
+    const playlist = playlistResult.rows[0];
+    const result = {
+      id: playlist.id,
+      name: playlist.name,
+      username: playlist.username,
+      songs: songsResult.rows,
+    };
+
+    return result;
+  }
+
+  // eslint-disable-next-line require-jsdoc
+  async deleteSongFromPlaylist(playlistId, songId) {
+    const query = {
+      text: `DELETE FROM playlist_songs 
+      WHERE playlist_id = $1 AND song_id = $2
+      RETURNING id`,
+      values: [playlistId, songId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rows.length) {
+      throw new InvariantError('Musik gagal dihapus dari playlist');
+    }
+  }
+
+  // eslint-disable-next-line require-jsdoc
   async verifyPlaylistOwner(playlistId, userId) {
     const query = {
       text: 'SELECT * FROM playlists WHERE id = $1',
