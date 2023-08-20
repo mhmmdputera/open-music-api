@@ -7,8 +7,9 @@ const AuthorizationError = require('../../exceptions/AuthorizationError');
 // eslint-disable-next-line require-jsdoc
 class CollaborationsService {
   // eslint-disable-next-line require-jsdoc
-  constructor() {
+  constructor(cacheService) {
     this._pool = new Pool();
+    this._cacheService = cacheService;
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -26,6 +27,7 @@ class CollaborationsService {
       throw new InvariantError('Kolaborasi gagal ditambahkan');
     }
 
+    await this._cacheService.delete(`playlist:${userId}`);
     return result.rows[0].id;
   }
 
@@ -42,6 +44,8 @@ class CollaborationsService {
     if (!result.rows.length) {
       throw new InvariantError('Kolaborasi gagal dihapus');
     }
+
+    await this._cacheService.delete(`playlist:${userId}`);
   }
 
   // eslint-disable-next-line require-jsdoc

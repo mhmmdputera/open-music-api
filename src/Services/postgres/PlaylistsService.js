@@ -8,9 +8,10 @@ const AuthorizationError = require('../../exceptions/AuthorizationError');
 // eslint-disable-next-line require-jsdoc
 class PlaylistsService {
   // eslint-disable-next-line require-jsdoc
-  constructor(collaborationsService) {
+  constructor(collaborationsService, cacheService) {
     this._pool = new Pool();
     this._collaborationsService = collaborationsService;
+    this._cacheService = cacheService;
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -27,22 +28,51 @@ class PlaylistsService {
       throw new InvariantError('Playlist gagal ditambahkan');
     }
 
+    await this._cacheService.delete(`playlist:${owner}`);
     return result.rows[0].id;
   }
 
   // eslint-disable-next-line require-jsdoc
   async getPlaylists(userId) {
-    const query = {
-      // eslint-disable-next-line max-len
-      text: 'SELECT p.id, p.name, u.username FROM playlists p INNER JOIN users u ON p.owner = u.id WHERE p.owner = $1',
-      values: [userId],
-    };
+    try {
+      const result = await this._cacheService.get(`playlist:${userId}`);
+      const playlists = JSON.parse(result);
+      return {
+        cache: true,
+        playlists,
+      };
+    } catch (error) {
+      const query = {
+        text: `SELECT p.id, p.name, u.username
+        FROM playlists p
+        INNER JOIN users u
+        ON p.owner = u.id
+        WHERE p.owner = $1
+  
+        UNION
+        
+        SELECT p.id, p.name, u.username
+        FROM collaborations c
+        INNER JOIN playlists p
+        ON c.playlist_id = p.id
+        INNER JOIN users u
+        ON p.owner = u.id
+        WHERE c.user_id = $1`,
+        values: [userId],
+      };
 
-    const result = await this._pool.query(query);
+      const result = await this._pool.query(query);
 
-    return {
-      playlists: result.rows,
-    };
+      await this._cacheService.set(
+          `playlist:${userId}`,
+          JSON.stringify(result.rows),
+      );
+
+      return {
+        cache: false,
+        playlists: result.rows,
+      };
+    }
   }
 
   // eslint-disable-next-line require-jsdoc
@@ -73,6 +103,9 @@ class PlaylistsService {
     if (!result.rows.length) {
       throw new InvariantError('Playlist gagal dihapus. Id tidak ditemukan.');
     }
+
+    const {owner} = result.rows[0];
+    await this._cacheService.delete(`playlist:${owner}`);
   }
 
   // eslint-disable-next-line require-jsdoc
